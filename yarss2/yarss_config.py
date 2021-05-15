@@ -24,7 +24,7 @@ except NameError:
     unicode = str
 
 
-LATEST_CONFIG_VERSION = 8
+LATEST_CONFIG_VERSION = 9
 DEFAULT_UPDATE_INTERVAL = 120
 
 DUMMY_RSSFEED_KEY = "9999"
@@ -171,6 +171,7 @@ class YARSSConfig(object):
         self.config.run_converter((5, 5), 6, self.update_config_to_version6)
         self.config.run_converter((6, 6), 7, self.update_config_to_version7)
         self.config.run_converter((7, 7), 8, self.update_config_to_version8)
+        self.config.run_converter((8, 8), 9, self.update_config_to_version9)
 
         default_config = get_fresh_subscription_config(key="")
         if self._insert_missing_dict_values(self.config["subscriptions"], default_config):
@@ -487,6 +488,19 @@ class YARSSConfig(object):
         self.run_for_each_dict_element(config["rssfeeds"], update_rssfeed)
         return config
 
+    def update_config_to_version9(self, config):
+        """Updates the config values to config file version (YaRSS2 v2.1.6)"""
+        self.log.info("Updating config file to version 9")
+        default_subscription_config = get_fresh_subscription_config(key="")
+
+        def update_subscription(subscription):
+            # Adding new fields
+            subscription["download_history"] = default_subscription_config["download_history"]
+            subscription["max_download_history"] = default_subscription_config["max_download_history"]
+
+        self.run_for_each_dict_element(config["subscriptions"], update_subscription)
+        return config
+
     def run_for_each_dict_element(self, conf_dict, update_func):
         for key in conf_dict.keys():
             update_func(conf_dict[key])
@@ -546,6 +560,8 @@ def get_fresh_subscription_config(name=u"", rssfeed_key="", regex_include=u"", r
     config_dict["active"] = active
     config_dict["last_match"] = last_match
     config_dict["ignore_timestamp"] = False
+    config_dict["download_history"] = []
+    config_dict["max_download_history"] = 0
     config_dict["move_completed"] = move_completed
     config_dict["download_location"] = download_location
     config_dict["custom_text_lines"] = u""

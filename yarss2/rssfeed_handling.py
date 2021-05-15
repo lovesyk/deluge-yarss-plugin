@@ -431,21 +431,25 @@ class RSSFeedHandler(object):
         last_match_dt = common.isodate_to_datetime(subscription_data["last_match"])
 
         for key in list(matches.keys()):
-            # Discard match only if timestamp is available,
-            # and the timestamp is older or equal to the last matching timestamp
-            matched_updated = common.isodate_to_datetime(matches[key]["updated"])
-            if matched_updated and last_match_dt >= matched_updated:
-                if subscription_data["ignore_timestamp"] is True:
-                    self.log.info("Old timestamp: '%s', but ignore option is enabled so add torrent anyways."
-                                  % matches[key]["title"])
-                else:
-                    self.log.info("Not adding because of old timestamp: '%s'" % matches[key]["title"])
-                    del matches[key]
-                    continue
-            fetch_data["matching_torrents"].append({"title": matches[key]["title"],
-                                                    "link": matches[key]["link"],
-                                                    "updated_datetime": matched_updated,
-                                                    "site_cookies_dict": fetch_data["site_cookies_dict"],
-                                                    "user_agent": fetch_data["user_agent"],
-                                                    "referrer": rssfeed_data["url"],
-                                                    "subscription_data": subscription_data})
+            # Discard match if the link is already included in the download history
+            if matches[key]["link"] in subscription_data["download_history"]:
+                self.log.info("Not adding because link is already in download history: '%s'" % matches[key]["link"])
+            else:
+                # Discard match only if timestamp is available,
+                # and the timestamp is older or equal to the last matching timestamp
+                matched_updated = common.isodate_to_datetime(matches[key]["updated"])
+                if matched_updated and last_match_dt >= matched_updated:
+                    if subscription_data["ignore_timestamp"] is True:
+                        self.log.info("Old timestamp: '%s', but ignore option is enabled so add torrent anyways."
+                                      % matches[key]["title"])
+                    else:
+                        self.log.info("Not adding because of old timestamp: '%s'" % matches[key]["title"])
+                        del matches[key]
+                        continue
+                fetch_data["matching_torrents"].append({"title": matches[key]["title"],
+                                                        "link": matches[key]["link"],
+                                                        "updated_datetime": matched_updated,
+                                                        "site_cookies_dict": fetch_data["site_cookies_dict"],
+                                                        "user_agent": fetch_data["user_agent"],
+                                                        "referrer": rssfeed_data["url"],
+                                                        "subscription_data": subscription_data})

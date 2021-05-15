@@ -174,6 +174,8 @@ class TorrentHandler(object):
                                  (torrent_match["title"], torrent_match["link"]))
             else:
                 self.log.info("Succesfully added torrent '%s'." % torrent_match["title"])
+                save_subscription = False
+
                 # Update subscription with date
                 torrent_time = torrent_match["updated_datetime"]
 
@@ -185,7 +187,18 @@ class TorrentHandler(object):
                 # The order of the torrents are in ordered from newest to oldest
                 if torrent_time and last_subscription_update <= torrent_time:
                     torrent_match["subscription_data"]["last_match"] = torrent_time.isoformat()
-                    # Save subsription with updated timestamp
+                    save_subscription = True
+
+                # Add link to download history if it is enabled
+                if torrent_match["subscription_data"]["max_download_history"] > 0:
+                    download_history = [torrent_match["link"]]
+                    download_history.extend(torrent_match["subscription_data"]["download_history"])
+                    download_history = download_history[:torrent_match["subscription_data"]["max_download_history"]]
+                    torrent_match["subscription_data"]["download_history"] = download_history
+                    save_subscription = True
+
+                # Save subscription with updated timestamp and download history
+                if save_subscription:
                     save_subscription_func(subscription_data=torrent_match["subscription_data"])
 
                 # Handle email notification

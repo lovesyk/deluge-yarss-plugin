@@ -30,6 +30,7 @@ class DialogSubscriptionGUI(object):
         self.matching_store = None
         self.icon_matching = GdkPixbuf.Pixbuf.new_from_file(get_resource("match.png"))
         self.icon_nonmatching = GdkPixbuf.Pixbuf.new_from_file(get_resource("no_match.png"))
+        self.download_history = []
         self.labels = None
 
     def setup_gui(self):
@@ -48,6 +49,7 @@ class DialogSubscriptionGUI(object):
             "on_button_fetch_clicked": self.on_rssfeed_selected,
             "on_button_last_matched_reset_clicked": self.on_button_last_matched_reset_clicked,
             "on_button_last_matched_now_clicked": self.on_button_last_matched_now_clicked,
+            "on_button_download_history_reset_clicked": self.on_button_download_history_reset_clicked,
             "on_general_checkbox_toggled": self.on_general_checkbox_toggled,
             "on_key_pressed": self.on_key_pressed,
             "on_textview_custom_text_move_cursor": lambda x, y: x,
@@ -424,6 +426,9 @@ class DialogSubscriptionGUI(object):
     def on_button_last_matched_now_clicked(self, button):
         self.get_object("txt_last_matched").set_text(get_current_date_in_isoformat())
 
+    def on_button_download_history_reset_clicked(self, button):
+        self.get_object("spinbutton_max_download_history").set_value(0)
+
     def show_rssfeed_mandatory_message(self):
         md = Gtk.MessageDialog(self.dialog, Gtk.DialogFlags.DESTROY_WITH_PARENT, Gtk.MessageType.INFO,
                                Gtk.ButtonsType.CLOSE, "You must select an RSS Feed")
@@ -510,6 +515,7 @@ class DialogSubscriptionGUI(object):
             download_location = active_string.strip()
         last_match = self.get_object("txt_last_matched").get_text()
         ignore_timestamp = self.get_object("checkbutton_ignore_timestamp").get_active()
+        max_download_history = int(self.get_object("spinbutton_max_download_history").get_value())
 
         max_download_speed = self.get_object("spinbutton_max_download_speed").get_value()
         max_upload_speed = self.get_object("spinbutton_max_upload_speed").get_value()
@@ -554,6 +560,8 @@ class DialogSubscriptionGUI(object):
         subscription_data["rssfeed_key"] = self.get_current_rssfeed_key()
         subscription_data["last_match"] = last_match
         subscription_data["ignore_timestamp"] = ignore_timestamp
+        subscription_data["download_history"] = self.download_history[:max_download_history]
+        subscription_data["max_download_history"] = max_download_history
 
         subscription_data["max_download_speed"] = int(max_download_speed)
         subscription_data["max_upload_speed"] = int(max_upload_speed)
@@ -638,6 +646,10 @@ class DialogSubscriptionGUI(object):
     def load_timestamp(self, subscription_data):
         self.get_object("txt_last_matched").set_text(subscription_data["last_match"])
         self.get_object("checkbutton_ignore_timestamp").set_active(subscription_data["ignore_timestamp"])
+
+    def load_download_history(self, subscription_data):
+        self.download_history = list(subscription_data["download_history"])
+        self.get_object("spinbutton_max_download_history").set_value(subscription_data["max_download_history"])
 
     def load_notifications_list_data(self, email_messages, subscription_data):
         # Load notification messages into combo
@@ -904,6 +916,7 @@ class DialogSubscription(DialogSubscriptionGUI):
         self.load_notifications_list_data(self.email_messages, self.subscription_data)
         self.load_path_choosers_data()
         self.load_timestamp(self.subscription_data)
+        self.load_download_history(self.subscription_data)
         self.get_labels_d.addCallback(self.load_labels, self.subscription_data)
 
     def load_path_choosers_data(self):
