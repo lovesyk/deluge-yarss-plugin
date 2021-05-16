@@ -902,7 +902,7 @@
                                                     <property name="secondary_icon_activatable">False</property>
                                                     <property name="primary_icon_sensitive">True</property>
                                                     <property name="secondary_icon_sensitive">True</property>
-                                                    <property name="adjustment">0 -2 9999 1 10 0</property>
+                                                    <property name="adjustment">0 -2 999999 1 10 0</property>
                                                   </widget>
                                                   <packing>
                                                     <property name="left_attach">1</property>
@@ -919,7 +919,7 @@
                                                     <property name="secondary_icon_activatable">False</property>
                                                     <property name="primary_icon_sensitive">True</property>
                                                     <property name="secondary_icon_sensitive">True</property>
-                                                    <property name="adjustment">0 -2 9999 1 10 0</property>
+                                                    <property name="adjustment">0 -2 999999 1 10 0</property>
                                                   </widget>
                                                   <packing>
                                                     <property name="left_attach">1</property>

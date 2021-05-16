@@ -1,5 +1,9 @@
 ## Changelog ##
 
+v2.1.6 - 2021-05-16
+
+* Increase selectable speed limits to match Deluge's
+
 v2.1.5 - 2021-03-21
 
 * Fix #63: Fix error on python 3.9 due to bug in feedparser
